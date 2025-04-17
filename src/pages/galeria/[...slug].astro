@@ -1,0 +1,23 @@
+---
+import { getCollection } from "astro:content";
+import type { InferGetStaticPropsType } from "astro";
+
+// layouts
+
+import GaleriaLayout from "@layouts/GaleriaLayout.astro";
+
+export async function getStaticPaths() {
+  const galeria = await getCollection("galeria");
+
+	return galeria.map((galeria) => ({
+		params: { slug: galeria.id },
+		props: { galeria },
+	}));
+}
+type Props = InferGetStaticPropsType<typeof getStaticPaths>;
+
+const { galeria } = Astro.props as Props;
+---
+
+
+<GaleriaLayout images={galeria.data.images} />

@@ -1,0 +1,62 @@
+---
+import { Image } from "astro:assets";
+
+interface Props {
+  images: any[]; // Acepta cualquier tipo de imagen importada desde colecciones de contenido
+}
+const { images } = Astro.props as Props;
+---
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Galería - Sabana Spaces</title>
+  </head>
+  <body>
+    <article class="mx-auto mt-12 px-4 md:mt-20 md:max-w-6xl">
+      <h1 class="text-3xl font-bold mb-8 text-center">Galería</h1>
+      <div id="gallery" class="flex flex-col items-center">
+        <!-- Imagen principal -->
+        <div id="main-image" class="w-full max-w-4xl">
+          <Image
+            src={images[0]}
+            alt="Imagen principal"
+            class="rounded-lg shadow w-full object-cover"
+            width={1200}
+            densities={[1.5, 2]}
+          />
+        </div>
+        <!-- Miniaturas -->
+        <div id="thumbnails" class="flex space-x-4 mt-4 overflow-x-auto">
+          {images.map((img, i) => (
+            <button
+              type="button"
+              class="border p-1 focus:outline-none focus:ring"
+              data-src={img.src}
+            >
+              <Image
+                src={img}
+                alt={`Miniatura ${i + 1}`}
+                class="rounded-lg shadow w-24 h-24 object-cover"
+                width={96}
+                densities={[1]}
+              />
+            </button>
+          ))}
+        </div>
+      </div>
+    </article>
+
+    <script client:load>
+      const mainImageContainer = document.getElementById('main-image');
+      const thumbnails = document.querySelectorAll('#thumbnails button');
+
+      thumbnails.forEach(btn => {
+        btn.addEventListener('click', () => {
+          const newSrc = btn.getAttribute('data-src');
+          mainImageContainer.innerHTML = `<img src="${newSrc}" alt="Imagen principal" class="rounded-lg shadow w-full object-cover" width="1200" />`;
+        });
+      });
+    </script>
+  </body>
+</html>
+

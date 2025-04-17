@@ -1,5 +1,6 @@
-import { defineCollection, reference, z } from "astro:content";
+import { defineCollection, z } from "astro:content";
 import { glob } from "astro/loaders";
+
 
 // Type-check frontmatter using a schema
 // portfolios
@@ -62,8 +63,23 @@ const otherPages = defineCollection({
 		}),
 });
 
+// gallery collection: each folder has an index.md with frontmatter listing images
+const galeria = defineCollection({
+  loader: glob({
+    pattern: "**/index.md",
+    base: "./src/data/galeria",
+  }),
+  schema: ({ image }) =>
+    z.object({
+      title: z.string(),
+      slug: z.string(),
+      images: z.array(image()), // Ensures images are imported correctly
+    }),
+});
+
 export const collections = {
 	portfolios,
 	testimonials,
 	otherPages,
+	galeria
 };
