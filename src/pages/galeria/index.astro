@@ -12,17 +12,3 @@ const posts = (await getCollection("galeria")) as Array<{ data: { slug: string; 
 
 <GaleriaLayout images={galeria.data.images} />
 
-<style>
-	main {
-		margin: auto;
-		padding: 1.5rem;
-		max-width: 60ch;
-	}
-
-	.link-card-grid {
-		display: grid;
-		grid-template-columns: repeat(auto-fit, minmax(24ch, 1fr));
-		gap: 1rem;
-		padding: 0;
-	}
-</style>

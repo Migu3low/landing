@@ -6,57 +6,202 @@ interface Props {
 }
 const { images } = Astro.props as Props;
 ---
+
 <html lang="es">
   <head>
-    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" charset="UTF-8"/>
     <title>Galería - Sabana Spaces</title>
+    <style>
+      body, html {
+        margin: 0;
+        padding: 0;
+        height: 100%;
+      }
+      
+      .gallery-wrapper {
+        position: relative;
+        min-height: 100vh;
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        backdrop-filter: blur(10px);
+      }
+      
+      .gallery-container {
+        position: relative; /* Agregado para posicionar el botón de forma absoluta */
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: flex-start;
+        width: 100%;
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px;
+        animation: fadeIn 0.5s ease-in forwards;
+      }
+      
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+        }
+        to {
+          opacity: 1;
+        }
+      }
+      
+      .main-image-container {
+        position: relative;
+        width: 100%;
+        margin-bottom: 20px;
+        border-radius: 10px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      }
+      
+      .main-image {
+        width: 100%;
+        height: auto;
+        border-radius: 10px;
+        object-fit: cover;
+      }
+      
+      .thumbnails {
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+        overflow-x: auto;
+        padding: 10px 0;
+        width: 100%;
+      }
+      
+      .thumbnail {
+        width: 100px;
+        height: 100px;
+        object-fit: cover;
+        border-radius: 5px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        cursor: pointer;
+        transition: transform 0.2s;
+      }
+      
+      .thumbnail:hover {
+        transform: scale(1.05);
+      }
+      
+      .nav-button {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        background: rgba(255,255,255,0.8);
+        border: none;
+        padding: 10px;
+        cursor: pointer;
+        border-radius: 50%;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        font-size: 18px;
+        z-index: 10;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      
+      .prev-button {
+        left: 10px;
+      }
+      
+      .next-button {
+        right: 10px;
+      }
+      
+      /* Estilo actualizado para el botón "Regresar" en la esquina superior derecha */
+      .back-button {
+        position: absolute;
+        top: 10px;
+        right: 20px;
+        padding: 0.5rem 1rem;
+        background: rgba(255,255,255,0.8);
+        border: none;
+        border-radius: 5px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        cursor: pointer;
+        font-size: 1rem;
+      }
+      
+      h1 {
+        margin-top: 0;
+        margin-bottom: 1.5rem;
+        text-align: center;
+      }
+      
+      @media (max-width: 768px) {
+        .gallery-container {
+          padding: 15px;
+          width: 100%;
+          box-sizing: border-box;
+        }
+        
+        .thumbnail {
+          width: 80px;
+          height: 80px;
+        }
+        
+        .thumbnails {
+          gap: 5px;
+        }
+      }
+    </style>
   </head>
   <body>
-    <article class="mx-auto mt-12 px-4 md:mt-20 md:max-w-6xl">
-      <h1 class="text-3xl font-bold mb-8 text-center">Galería</h1>
-      <div id="gallery" class="flex flex-col items-center">
-        <!-- Imagen principal -->
-        <div id="main-image" class="w-full max-w-4xl">
-          <Image
-            src={images[0]}
-            alt="Imagen principal"
-            class="rounded-lg shadow w-full object-cover"
-            width={1200}
-            densities={[1.5, 2]}
-          />
+    <div class="gallery-wrapper">
+      <article class="gallery-container" data-images={JSON.stringify(images.map(img => img.src))}>
+        <!-- Botón Regresar -->
+        <button class="back-button" onclick="history.back()">Regresar</button>
+        <h1>Galería</h1>
+        <div class="main-image-container group relative">
+          <img id="main-image" src={images[0].src} alt="Imagen principal" class="main-image" />
+          <button id="prev-btn" class="nav-button prev-button" aria-label="Anterior">←</button>
+          <button id="next-btn" class="nav-button next-button" aria-label="Siguiente">→</button>
         </div>
-        <!-- Miniaturas -->
-        <div id="thumbnails" class="flex space-x-4 mt-4 overflow-x-auto">
+        <div class="thumbnails">
           {images.map((img, i) => (
-            <button
-              type="button"
-              class="border p-1 focus:outline-none focus:ring"
-              data-src={img.src}
-            >
-              <Image
-                src={img}
-                alt={`Miniatura ${i + 1}`}
-                class="rounded-lg shadow w-24 h-24 object-cover"
-                width={96}
-                densities={[1]}
-              />
-            </button>
+            <img src={img.src} alt={`Miniatura ${i + 1}`} class="thumbnail" data-index={i} loading="lazy" />
           ))}
         </div>
-      </div>
-    </article>
+      </article>
+    </div>
 
-    <script client:load>
-      const mainImageContainer = document.getElementById('main-image');
-      const thumbnails = document.querySelectorAll('#thumbnails button');
+    <!-- Se carga el script de forma diferida -->
+    <script type="module">
+      document.addEventListener('DOMContentLoaded', () => {
+        const galleryContainer = document.querySelector('.gallery-container');
+        const dataAttr = galleryContainer.getAttribute('data-images');
+        
+        const imageSrcs = JSON.parse(dataAttr || '[]');
+        let currentIndex = 0;
+        const mainImage = document.getElementById("main-image");
 
-      thumbnails.forEach(btn => {
-        btn.addEventListener('click', () => {
-          const newSrc = btn.getAttribute('data-src');
-          mainImageContainer.innerHTML = `<img src="${newSrc}" alt="Imagen principal" class="rounded-lg shadow w-full object-cover" width="1200" />`;
+        // Asignar click a cada miniatura
+        const thumbnails = document.querySelectorAll('.thumbnail');
+        thumbnails.forEach((thumb, index) => {
+          thumb.addEventListener('click', () => {
+            
+            mainImage.src = imageSrcs[index];
+            currentIndex = index;
+          });
+        });
+
+        document.getElementById("prev-btn")?.addEventListener("click", () => {
+          currentIndex = (currentIndex - 1 + imageSrcs.length) % imageSrcs.length;
+          
+          mainImage.src = imageSrcs[currentIndex];
+        });
+
+        document.getElementById("next-btn")?.addEventListener("click", () => {
+          currentIndex = (currentIndex + 1) % imageSrcs.length;
+          
+          mainImage.src = imageSrcs[currentIndex];
         });
       });
     </script>
   </body>
 </html>
-
