@@ -7,8 +7,9 @@ import { getCollection } from "astro:content";
 
 
 const posts = (await getCollection("galeria")) as Array<{ data: { slug: string; title: string; images: any[] } }>;
+const images = posts.map(post => post.data.images).flat();
 
 ---
 
-<GaleriaLayout images={galeria.data.images} />
+<GaleriaLayout images={images}/>
 
